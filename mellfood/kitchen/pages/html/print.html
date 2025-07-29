@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Struk Melfood Kitchen</title>
+  <style>
+  body {
+    font-family: 'Courier New', monospace;
+    background-color: #e3f2fd;
+    padding: 20px;
+  }
+
+  .order {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 2px 0;
+  }
+
+  .note {
+    font-size: 12px;
+    font-style: italic;
+    color: #666;
+  }
+
+  .actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .print { background: #0d47a1; color: white; }
+  .bluetooth { background: #ffc107; color: black; }
+  .done { background: #388e3c; color: white; }
+
+  @media print {
+    body {
+      background: white;
+      padding: 0;
+      margin: 0;
+    }
+
+    body * {
+      visibility: hidden;
+    }
+
+    .printable, .printable * {
+      visibility: visible;
+    }
+
+    .printable {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      padding: 10px;
+      font-size: 13px;
+      font-family: 'Courier New', monospace;
+      line-height: 1.4;
+    }
+
+    .actions {
+      display: none;
+    }
+
+    .order {
+      box-shadow: none;
+      border: none;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .item {
+      font-size: 13px;
+    }
+
+    h1, h2, h3 {
+      font-size: 16px;
+      text-align: center;
+      margin: 4px 0;
+    }
+  }
+</style>
+
+</head>
+<body>
+  <h1>Daftar Pesanan Melfood Kitchen</h1>
+  <div id="container">Memuat pesanan...</div>
+
+  <script>
+    const API_URL = "https://mellfood.nasiuduklapangantenis.my.id";
+    const container = document.getElementById("container");
+
+    async function fetchOrders() {
+      try {
+        const res = await fetch(`${API_URL}/api/orders`);
+        const orders = await res.json();
+        if (!Array.isArray(orders)) throw new Error("Format tidak sesuai");
+
+        container.innerHTML = '';
+        orders.forEach(renderOrder);
+      } catch (err) {
+        container.innerHTML = `<p style="color:red;">Gagal mengambil pesanan: ${err.message}</p>`;
+        console.error(err);
+      }
+    }
+
+    function renderOrder(order) {
+      const div = document.createElement("div");
+      div.className = "order printable";
+      div.id = `order-${order.id}`;
+
+      const itemsHTML = order.items.map(item => `
+        <div class="item">
+          <span>${item.quantity}x ${item.menu_name}</span>
+          <span>Rp ${(item.price_at_purchase * item.quantity).toLocaleString('id-ID')}</span>
+        </div>
+        <div class="note">Catatan: ${item.notes || '-'}</div>
+      `).join('');
+
+      div.innerHTML = `
+        <h3>Pesanan #${order.id}</h3>
+        <p><strong>Nama:</strong> ${order.customer_name}</p>
+        <p><strong>Alamat:</strong> ${order.customer_address || '-'}</p>
+        ${itemsHTML}
+        <p><strong>Total:</strong> Rp ${parseFloat(order.total_price).toLocaleString('id-ID')}</p>
+        <div class="actions">
+          <button class="print" onclick="printOrder(${order.id})">Cetak</button>
+          <button class="bluetooth" onclick="bluetoothPrint(${order.id})">Bluetooth</button>
+          <button class="done" onclick="markAsDone(${order.id})">Selesai</button>
+        </div>
+      `;
+
+      container.appendChild(div);
+    }
+
+    function printOrder(id) {
+      document.querySelectorAll(".order").forEach(o => o.style.display = "none");
+      const el = document.getElementById(`order-${id}`);
+      if (el) el.style.display = "block";
+      window.print();
+      setTimeout(() => {
+        document.querySelectorAll(".order").forEach(o => o.style.display = "");
+      }, 500);
+    }
+
+    function bluetoothPrint(id) {
+      const encodedURL = encodeURIComponent(`${API_URL}/api/orders/${id}/print`);
+      window.location.href = `my.bluetoothprint.scheme://${encodedURL}`;
+    }
+
+    async function markAsDone(id) {
+      try {
+        await fetch(`${API_URL}/api/orders/${id}/printed`, { method: 'POST' });
+        alert(`Pesanan #${id} ditandai selesai`);
+        fetchOrders();
+      } catch (err) {
+        alert('Gagal menyelesaikan pesanan.');
+      }
+    }
+
+    fetchOrders();
+  </script>
+</body>
+</html>

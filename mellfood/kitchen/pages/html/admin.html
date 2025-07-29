@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Melfood Admin Panel</title>
+  <link rel="stylesheet" href="/frontend/style.css" />
+  <style>
+    .menu-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 16px;
+      margin-bottom: 20px;
+      max-width: 300px;
+      display: inline-block;
+      vertical-align: top;
+      margin-right: 20px;
+      text-align: center;
+    }
+
+    .menu-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .admin-form-wrapper {
+      background-color: #f9f9f9;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      max-width: 600px;
+      margin: 20px auto;
+    }
+
+    .admin-form div {
+      margin-bottom: 18px;
+    }
+
+    .admin-form label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .admin-form input[type="text"],
+    .admin-form input[type="number"],
+    .admin-form input[type="file"] {
+      width: calc(100% - 20px);
+      padding: 12px 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+
+    .admin-form input:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+    }
+
+    .admin-form input[type="checkbox"] {
+      margin-right: 8px;
+      transform: scale(1.1);
+    }
+
+    .admin-form label input[type="checkbox"] {
+      display: inline-block;
+      margin-right: 15px;
+    }
+
+    .admin-form .buy-button {
+      background-color: #28a745;
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      cursor: pointer;
+    }
+
+    .admin-form .buy-button:hover {
+      background-color: #218838;
+      transform: translateY(-2px);
+    }
+
+    #imagePreviewContainer {
+      border: 1px dashed #ccc;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    #imagePreview {
+      max-width: 150px;
+      height: auto;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .toggle-available-button {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .toggle-available-button:hover {
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <header class="main-header">
+    <div class="container header-content">
+      <h1 class="logo">Melfood Admin</h1>
+    </div>
+  </header>
+  <nav style="margin-top: 10px;">
+  <a href="./print.html" target="_blank" style="
+    background-color: #0d47a1;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+    display: inline-block;
+    margin-top: 10px;
+    margin-left: 10px;
+  ">🧾 Buka Halaman Cetak Struk</a>
+</nav>
+
+
+  <main class="container" style="margin-top: 40px;">
+    <h2>Tambah Menu Baru</h2>
+    <div class="admin-form-wrapper">
+      <form id="menuForm" enctype="multipart/form-data" class="admin-form">
+        <input type="hidden" id="editId" name="id" />
+        <div>
+          <label for="name">Nama Menu:</label>
+          <input type="text" id="name" name="name" required />
+        </div>
+        <div>
+          <label for="price">Harga:</label>
+          <input type="number" id="price" name="price" step="0.01" required />
+        </div>
+        <div>
+          <label for="ingredients">Bahan-Bahan (pisahkan dengan koma):</label>
+          <input type="text" id="ingredients" name="ingredients" required />
+        </div>
+        <div>
+          <label><input type="checkbox" name="is_recommended" id="is_recommended" value="1" /> Rekomendasi</label>
+          <label><input type="checkbox" name="is_best_seller" id="is_best_seller" value="1" /> Best Seller</label>
+        </div>
+        <div>
+          <label for="image">Gambar:</label>
+          <input type="file" id="image" name="image" accept="image/*" />
+          <div id="imagePreviewContainer" style="display:none;">
+            <img id="imagePreview" src="#" alt="Preview" />
+          </div>
+        </div>
+        <button type="submit" class="buy-button">Simpan</button>
+      </form>
+    </div>
+
+    <div id="adminMessage" style="margin-top: 20px;"></div>
+    <h2 style="margin-top: 40px;">Daftar Menu</h2>
+    <div id="menuList"></div>
+  </main>
+
+  <script>
+    async function fetchMenus() {
+      const res = await fetch('https://mellfood.nasiuduklapangantenis.my.id/api/menus');
+      const menus = await res.json();
+      const menuList = document.getElementById('menuList');
+      menuList.innerHTML = '';
+
+      menus.forEach(menu => {
+        const div = document.createElement('div');
+        div.className = 'menu-card';
+        div.innerHTML = `
+          <img src="https://mellfood.nasiuduklapangantenis.my.id${menu.image_url}" alt="${menu.name}" />
+          <h3>${menu.name}</h3>
+          <p><strong>Rp${parseInt(menu.price).toLocaleString()}</strong></p>
+          <p style="font-size: 0.9em; color: #555">${menu.ingredients}</p>
+          <button onclick="editMenu(${menu.id})">✏️ Edit</button>
+          <button onclick="deleteMenu(${menu.id})">🗑️ Hapus</button>
+          <button class="toggle-available-button" onclick="toggleAvailable(${menu.id}, ${menu.available})" title="Ubah Ketersediaan">
+            ${menu.available == 1 ? '👁️' : '🙈'}
+          </button>
+        `;
+        menuList.appendChild(div);
+      });
+    }
+
+    async function toggleAvailable(id, currentStatus) {
+      const newStatus = currentStatus === 1 ? 0 : 1;
+
+      try {
+        const res = await fetch(`https://mellfood.nasiuduklapangantenis.my.id/api/menus/${id}/available`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ available: newStatus })
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+          alert(`✅ Menu ${newStatus === 1 ? 'tersedia' : 'tidak tersedia'}.`);
+          fetchMenus();
+        } else {
+          alert(`❌ Gagal: ${result.error || 'Terjadi kesalahan.'}`);
+        }
+      } catch (err) {
+        alert(`❌ Kesalahan koneksi: ${err.message}`);
+      }
+    }
+
+    async function editMenu(id) {
+      const res = await fetch('https://mellfood.nasiuduklapangantenis.my.id/api/menus');
+      const menus = await res.json();
+      const menu = menus.find(m => m.id === id);
+      if (!menu) return;
+      document.getElementById('editId').value = menu.id;
+      document.getElementById('name').value = menu.name;
+      document.getElementById('price').value = menu.price;
+      document.getElementById('ingredients').value = menu.ingredients;
+      document.getElementById('is_recommended').checked = !!menu.is_recommended;
+      document.getElementById('is_best_seller').checked = !!menu.is_best_seller;
+    }
+
+    async function deleteMenu(id) {
+      if (!confirm('Yakin ingin menghapus menu ini?')) return;
+      const res = await fetch(`https://mellfood.nasiuduklapangantenis.my.id/api/menus/${id}`, {
+        method: 'DELETE'
+      });
+      const result = await res.json();
+      alert(result.message);
+      fetchMenus();
+    }
+
+    document.getElementById('image').addEventListener('change', function () {
+      const preview = document.getElementById('imagePreview');
+      const container = document.getElementById('imagePreviewContainer');
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          preview.src = e.target.result;
+          container.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        container.style.display = 'none';
+        preview.src = '#';
+      }
+    });
+
+    document.getElementById('menuForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const isEdit = !!form.editId.value;
+
+      formData.set('is_recommended', form.is_recommended.checked ? 1 : 0);
+      formData.set('is_best_seller', form.is_best_seller.checked ? 1 : 0);
+      formData.set('available', 1); // default available aktif saat tambah menu
+
+      let url = 'https://mellfood.nasiuduklapangantenis.my.id/api/menus';
+      let method = 'POST';
+
+      if (isEdit) {
+        url = `https://mellfood.nasiuduklapangantenis.my.id/api/menus/${form.editId.value}`;
+        method = 'PUT';
+      }
+
+      const response = await fetch(url, {
+        method,
+        body: formData
+      });
+
+      const result = await response.json();
+      const message = document.getElementById('adminMessage');
+      if (response.ok) {
+        message.innerHTML = `<p style="color: green;">✅ ${result.message}</p>`;
+        form.reset();
+        document.getElementById('imagePreviewContainer').style.display = 'none';
+        fetchMenus();
+      } else {
+        message.innerHTML = `<p style="color: red;">❌ ${result.error || 'Gagal menyimpan menu.'}</p>`;
+      }
+    });
+
+    fetchMenus();
+  </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+/* General form styling */
+.admin-form-wrapper {
+  background-color: #f9f9f9;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  max-width: 600px;
+  margin: 20px auto; /* Center the form */
+}
+
+.admin-form div {
+  margin-bottom: 18px; /* Spacing between form groups */
+}
+
+.admin-form label {
+  display: block; /* Make labels appear above inputs */
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.admin-form input[type="text"],
+.admin-form input[type="number"],
+.admin-form input[type="file"] {
+  width: calc(100% - 20px); /* Full width minus padding */
+  padding: 12px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1em;
+  box-sizing: border-box; /* Include padding in width */
+  transition: border-color 0.3s ease;
+}
+
+.admin-form input[type="text"]:focus,
+.admin-form input[type="number"]:focus,
+.admin-form input[type="file"]:focus {
+  border-color: #007bff; /* Highlight on focus */
+  outline: none; /* Remove default outline */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+}
+
+/* Checkbox styling */
+.admin-form input[type="checkbox"] {
+  margin-right: 8px;
+  transform: scale(1.1); /* Slightly larger checkboxes */
+}
+
+.admin-form label input[type="checkbox"] {
+  display: inline-block; /* Keep label and checkbox on the same line */
+  margin-right: 15px; /* Space between checkboxes */
+}
+
+/* Submit button styling (reusing .buy-button or creating a new one) */
+.admin-form .buy-button { /* Assuming .buy-button is for general buttons */
+  background-color: #28a745; /* Green for save */
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 20px;
+  width: auto; /* Adjust width */
+  display: inline-block; /* Allow other elements next to it if needed */
+}
+
+.admin-form .buy-button:hover {
+  background-color: #218838;
+  transform: translateY(-2px); /* Slight lift on hover */
+}
+
+/* Image preview styling */
+#imagePreviewContainer {
+  border: 1px dashed #ccc;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+#imagePreview {
+  max-width: 150px; /* Adjust size for preview */
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Message styling */
+#adminMessage p {
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-weight: 500;
+  margin-top: 15px;
+  text-align: center;
+}
+
+#adminMessage p[style*="green"] {
+  background-color: #d4edda;
+  border: 1px solid #28a745;
+  color: #155724;
+}
+
+#adminMessage p[style*="red"] {
+  background-color: #f8d7da;
+  border: 1px solid #dc3545;
+  color: #721c24;
+}
+
+/* Edit mode note */
+#editModeNote {
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  color: #856404;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+  font-size: 0.9em;
+  text-align: center;
+}
